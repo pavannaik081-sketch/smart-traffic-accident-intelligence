@@ -501,7 +501,6 @@ except Exception as error:
 st.sidebar.success(
     f"Dataset loaded: {len(df):,} records"
 )
-
 # =========================================================
 # 9. SIDEBAR FILTERS
 # =========================================================
@@ -850,7 +849,6 @@ st.plotly_chart(
     style_chart(fig),
     width="stretch"
 )
-
 # =========================================================
 # 17. BOROUGH-WISE ACCIDENT ANALYSIS
 # =========================================================
@@ -1106,8 +1104,7 @@ else:
         "Hotspot map not found. Check that this file exists: "
         "visualizations/maps/accident_hotspot_map.html"
     )
-
-# =========================================================
+    # =========================================================
 # 22. ACCIDENT DATA EXPLORER
 # =========================================================
 st.divider()
@@ -1141,22 +1138,25 @@ selected_table_columns = st.multiselect(
     default=display_columns
 )
 
-explorer_df = filtered_df
+explorer_df = filtered_df.copy()
 
 if search_text.strip():
 
-    search_mask = explorer_df[
-        display_columns
-    ].astype(str).apply(
-        lambda column: column.str.contains(
-            search_text.strip(),
-            case=False,
-            na=False,
-            regex=False
+    search_mask = (
+        explorer_df[display_columns]
+        .astype(str)
+        .apply(
+            lambda column: column.str.contains(
+                search_text.strip(),
+                case=False,
+                na=False,
+                regex=False
+            )
         )
-    ).any(axis=1)
+        .any(axis=1)
+    )
 
-    explorer_df = explorer_df.loc[search_mask]
+    explorer_df = explorer_df.loc[search_mask].copy()
 
 if not selected_table_columns:
 
@@ -1191,22 +1191,23 @@ st.caption(
     "to protect cloud memory."
 )
 
-if st.button("Prepare CSV download"):
+# Export the same records shown by the Data Explorer, including its search.
+# Limit rows before CSV conversion to keep memory usage under control.
+csv_to_download = (
+    explorer_df[display_columns]
+    .head(DOWNLOAD_ROW_LIMIT)
+    .to_csv(index=False)
+    .encode("utf-8")
+)
 
-    csv_to_download = (
-        filtered_df[display_columns]
-        .head(DOWNLOAD_ROW_LIMIT)
-        .to_csv(index=False)
-        .encode("utf-8")
-    )
-
-    st.download_button(
-        label="⬇️ Download CSV",
-        data=csv_to_download,
-        file_name="filtered_accident_data.csv",
-        mime="text/csv",
-        width="stretch"
-    )
+st.download_button(
+    label="⬇️ Download CSV",
+    data=csv_to_download,
+    file_name="filtered_accident_data.csv",
+    mime="text/csv",
+    width="stretch",
+    key="download_filtered_accident_data"
+)
 
 # =========================================================
 # 24. FOOTER
