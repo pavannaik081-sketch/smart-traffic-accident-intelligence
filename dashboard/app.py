@@ -16,70 +16,300 @@ st.set_page_config(
 )
 
 # =========================================================
-# 2. CUSTOM CSS
+# 2. THEME SELECTION
 # =========================================================
-st.markdown("""
+st.sidebar.title("🎨 Dashboard Appearance")
+
+theme = st.sidebar.radio(
+    "Choose Dashboard Theme",
+    ["Light Mode", "Dark Mode"],
+    horizontal=True,
+    key="dashboard_theme"
+)
+
+DARK_MODE = theme == "Dark Mode"
+
+if DARK_MODE:
+    BG = "#0e1117"
+    PANEL = "#1b2230"
+    SIDEBAR = "#151b26"
+    TEXT = "#f1f5f9"
+    MUTED = "#cbd5e1"
+    BORDER = "#334155"
+    INPUT_BG = "#263244"
+    ACCENT = "#60a5fa"
+    GRID = "#334155"
+else:
+    BG = "#f4f7fc"
+    PANEL = "#ffffff"
+    SIDEBAR = "#eaf0f8"
+    TEXT = "#172554"
+    MUTED = "#475569"
+    BORDER = "#dbe3ef"
+    INPUT_BG = "#ffffff"
+    ACCENT = "#2563eb"
+    GRID = "#e5eaf2"
+
+# =========================================================
+# 3. RESPONSIVE CSS AND THEME STYLING
+# =========================================================
+st.markdown(f"""
 <style>
-.stApp {
-    background-color: #f4f7fc;
-    color: #1e293b;
-}
-.block-container {
+
+/* Main application */
+.stApp {{
+    background-color: {BG};
+    color: {TEXT};
+}}
+
+[data-testid="stAppViewContainer"] {{
+    background-color: {BG};
+}}
+
+[data-testid="stHeader"] {{
+    background-color: {BG};
+}}
+
+.block-container {{
     padding-top: 1.5rem;
     padding-bottom: 2rem;
-}
-.stApp h1, .stApp h2, .stApp h3, .stApp h4 {
-    color: #172554 !important;
-}
-.stApp p, .stApp li {
-    color: #334155;
-}
-.dashboard-subtitle {
-    color: #475569 !important;
-    font-size: 15px;
-}
-section[data-testid="stSidebar"] {
-    background-color: #eef3fa;
-}
-section[data-testid="stSidebar"] h1,
-section[data-testid="stSidebar"] h2,
-section[data-testid="stSidebar"] h3,
-section[data-testid="stSidebar"] p,
-section[data-testid="stSidebar"] label {
-    color: #1e293b !important;
-}
-.stApp label {
-    color: #263653 !important;
+    padding-left: 3%;
+    padding-right: 3%;
+    max-width: 1600px;
+}}
+
+/* All headings */
+h1, h2, h3, h4, h5, h6 {{
+    color: {TEXT} !important;
+    overflow-wrap: anywhere;
+}}
+
+/* General text */
+p, span, label, li, small, div {{
+    color: inherit;
+}}
+
+.stMarkdown,
+.stMarkdown p,
+.stMarkdown li {{
+    color: {TEXT};
+}}
+
+.dashboard-subtitle {{
+    color: {MUTED} !important;
+    font-size: 16px;
+}}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {{
+    background-color: {SIDEBAR};
+    border-right: 1px solid {BORDER};
+}}
+
+section[data-testid="stSidebar"] * {{
+    color: {TEXT} !important;
+}}
+
+section[data-testid="stSidebar"] label {{
     font-weight: 600;
-}
-[data-testid="stMetricLabel"] {
-    color: #475569 !important;
-}
-[data-testid="stMetricValue"] {
-    color: #172554 !important;
-}
-.js-plotly-plot .legend text,
-.js-plotly-plot .gtitle,
-.js-plotly-plot .xtitle,
-.js-plotly-plot .ytitle,
-.js-plotly-plot .xtick text,
-.js-plotly-plot .ytick text {
-    fill: #172554 !important;
-}
-[data-testid="stDownloadButton"] button,
-[data-testid="stButton"] button {
-    background-color: #172554 !important;
+}}
+
+/* Metrics */
+[data-testid="stMetric"] {{
+    background-color: {PANEL};
+    border: 1px solid {BORDER};
+    padding: 18px;
+    border-radius: 14px;
+}}
+
+[data-testid="stMetricLabel"],
+[data-testid="stMetricLabel"] p {{
+    color: {MUTED} !important;
+}}
+
+[data-testid="stMetricValue"] {{
+    color: {TEXT} !important;
+    overflow-wrap: anywhere;
+}}
+
+/* Input controls */
+.stTextInput input,
+.stNumberInput input,
+.stDateInput input,
+.stSelectbox div[data-baseweb="select"],
+.stMultiSelect div[data-baseweb="select"],
+.stTextArea textarea {{
+    background-color: {INPUT_BG} !important;
+    color: {TEXT} !important;
+    border-color: {BORDER} !important;
+}}
+
+/* Dropdown menus */
+[data-baseweb="popover"],
+[data-baseweb="menu"],
+[data-baseweb="select"] {{
+    background-color: {PANEL} !important;
+    color: {TEXT} !important;
+}}
+
+[data-baseweb="menu"] *,
+[data-baseweb="popover"] * {{
+    color: {TEXT} !important;
+}}
+
+/* Radio buttons and checkboxes */
+.stRadio label,
+.stCheckbox label {{
+    color: {TEXT} !important;
+}}
+
+/* Buttons */
+.stButton button,
+.stDownloadButton button {{
+    background-color: {ACCENT} !important;
     color: white !important;
-}
-[data-testid="stDownloadButton"] button *,
-[data-testid="stButton"] button * {
+    border: none !important;
+    border-radius: 9px;
+    min-height: 42px;
+    font-weight: 600;
+}}
+
+.stButton button *,
+.stDownloadButton button * {{
     color: white !important;
-}
+}}
+
+.stButton button:hover,
+.stDownloadButton button:hover {{
+    opacity: 0.85;
+}}
+
+/* Tables */
+[data-testid="stDataFrame"],
+[data-testid="stTable"] {{
+    border: 1px solid {BORDER};
+    border-radius: 10px;
+}}
+
+/* Alerts and information boxes */
+[data-testid="stAlert"] {{
+    border-radius: 10px;
+}}
+
+/* Plotly chart containers */
+[data-testid="stPlotlyChart"] {{
+    background-color: {PANEL};
+    border: 1px solid {BORDER};
+    border-radius: 12px;
+    padding: 5px;
+    overflow: hidden;
+}}
+
+/* Captions */
+.stCaption,
+[data-testid="stCaptionContainer"] {{
+    color: {MUTED} !important;
+}}
+
+/* Dividers */
+hr {{
+    border-color: {BORDER} !important;
+}}
+
+/* Responsive layout - tablets */
+@media screen and (max-width: 1024px) {{
+    .block-container {{
+        padding-left: 3%;
+        padding-right: 3%;
+    }}
+
+    h1 {{
+        font-size: 30px !important;
+    }}
+
+    h2 {{
+        font-size: 25px !important;
+    }}
+}}
+
+/* Responsive layout - mobile */
+@media screen and (max-width: 768px) {{
+    .block-container {{
+        padding: 1rem 0.8rem 2rem 0.8rem;
+    }}
+
+    h1 {{
+        font-size: 25px !important;
+        line-height: 1.3 !important;
+    }}
+
+    h2 {{
+        font-size: 21px !important;
+        line-height: 1.35 !important;
+    }}
+
+    h3 {{
+        font-size: 18px !important;
+    }}
+
+    p {{
+        font-size: 14px;
+        overflow-wrap: anywhere;
+    }}
+
+    [data-testid="stMetric"] {{
+        padding: 12px;
+        margin-bottom: 8px;
+    }}
+
+    [data-testid="stMetricValue"] {{
+        font-size: 22px !important;
+    }}
+
+    [data-testid="stPlotlyChart"] {{
+        width: 100% !important;
+        padding: 0;
+    }}
+
+    .stButton button,
+    .stDownloadButton button {{
+        width: 100%;
+    }}
+}}
+
+/* Smaller phones */
+@media screen and (max-width: 480px) {{
+    .block-container {{
+        padding-left: 0.6rem;
+        padding-right: 0.6rem;
+    }}
+
+    h1 {{
+        font-size: 22px !important;
+    }}
+
+    h2 {{
+        font-size: 19px !important;
+    }}
+
+    [data-testid="stMetricValue"] {{
+        font-size: 19px !important;
+    }}
+
+    [data-testid="stMetricLabel"] {{
+        font-size: 12px !important;
+    }}
+
+    .dashboard-subtitle {{
+        font-size: 13px;
+    }}
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
 # =========================================================
-# 3. PROJECT PATHS AND DATA SOURCE
+# 4. PROJECT PATHS AND DATA SOURCE
 # =========================================================
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -107,42 +337,43 @@ HOTSPOT_MAP_PATH = (
 )
 
 # =========================================================
-# 4. CHART STYLING
+# 5. CHART STYLING
 # =========================================================
 def style_chart(fig):
     fig.update_layout(
-        template="plotly_white",
+        template="plotly_dark" if DARK_MODE else "plotly_white",
         font=dict(
             family="Arial",
             size=13,
-            color="#172554"
+            color=TEXT
         ),
         title=dict(
-            font=dict(size=18, color="#172554"),
+            font=dict(size=18, color=TEXT),
             x=0.02
         ),
-        paper_bgcolor="#ffffff",
-        plot_bgcolor="#ffffff",
+        paper_bgcolor=PANEL,
+        plot_bgcolor=PANEL,
         legend=dict(
-            font=dict(color="#172554", size=12),
-            title_font=dict(color="#172554")
+            font=dict(color=TEXT, size=12),
+            title_font=dict(color=TEXT)
         ),
         xaxis=dict(
-            title_font=dict(color="#172554"),
-            tickfont=dict(color="#334155"),
-            gridcolor="#e5eaf2"
+            title_font=dict(color=TEXT),
+            tickfont=dict(color=TEXT),
+            gridcolor=GRID
         ),
         yaxis=dict(
-            title_font=dict(color="#172554"),
-            tickfont=dict(color="#334155"),
-            gridcolor="#e5eaf2"
+            title_font=dict(color=TEXT),
+            tickfont=dict(color=TEXT),
+            gridcolor=GRID
         ),
-        margin=dict(l=35, r=25, t=65, b=45)
+        margin=dict(l=35, r=25, t=65, b=45),
+        autosize=True
     )
     return fig
 
 # =========================================================
-# 5. LOAD DATASET
+# 6. LOAD DATASET
 # =========================================================
 @st.cache_data(show_spinner="Loading accident dataset...")
 def load_data(file_source):
@@ -253,7 +484,7 @@ def load_data(file_source):
     return df
 
 # =========================================================
-# 6. DASHBOARD HEADER
+# 7. DASHBOARD HEADER
 # =========================================================
 st.title("🚦 Smart Traffic & Accident Intelligence System")
 
@@ -265,7 +496,7 @@ Geographic Accident Hotspots
 """, unsafe_allow_html=True)
 
 # =========================================================
-# 7. LOAD DATA
+# 8. LOAD DATA
 # =========================================================
 st.info(
     "Dataset source: "
@@ -292,7 +523,7 @@ st.sidebar.success(
 )
 
 # =========================================================
-# 8. SIDEBAR FILTERS
+# 9. SIDEBAR FILTERS
 # =========================================================
 st.sidebar.title("🔎 Dashboard Filters")
 
@@ -362,7 +593,7 @@ selected_severities = st.sidebar.multiselect(
 )
 
 # =========================================================
-# 9. FILTER DATA
+# 10. FILTER DATA
 # =========================================================
 end_date_exclusive = end_date + pd.Timedelta(days=1)
 
@@ -384,7 +615,7 @@ if filtered_df.empty:
     st.stop()
 
 # =========================================================
-# 10. DISPLAY SETTINGS
+# 11. DISPLAY SETTINGS
 # =========================================================
 st.sidebar.divider()
 st.sidebar.subheader("⚙️ Interactive Display")
@@ -416,7 +647,7 @@ map_color_by = st.sidebar.selectbox(
 )
 
 # =========================================================
-# 11. OVERALL ACCIDENT STATISTICS
+# 12. OVERALL ACCIDENT STATISTICS
 # =========================================================
 st.divider()
 st.header("📊 Overall Accident Statistics")
@@ -442,7 +673,7 @@ st.caption(
 )
 
 # =========================================================
-# 12. ACCIDENT SEVERITY ANALYSIS
+# 13. ACCIDENT SEVERITY ANALYSIS
 # =========================================================
 st.divider()
 st.header("1. Accident Severity Analysis")
@@ -504,7 +735,7 @@ with col2:
     )
 
 # =========================================================
-# 13. TIME-BASED ACCIDENT ANALYSIS
+# 14. TIME-BASED ACCIDENT ANALYSIS
 # =========================================================
 st.divider()
 st.header("2. Time-Based Accident Analysis")
@@ -567,7 +798,7 @@ with col2:
     )
 
 # =========================================================
-# 14. HOURLY ACCIDENT ANALYSIS
+# 15. HOURLY ACCIDENT ANALYSIS
 # =========================================================
 st.divider()
 st.header("3. Hourly Accident Analysis")
@@ -603,7 +834,7 @@ st.plotly_chart(
 )
 
 # =========================================================
-# 15. DAY-WISE ACCIDENT ANALYSIS
+# 16. DAY-WISE ACCIDENT ANALYSIS
 # =========================================================
 st.divider()
 st.header("4. Day-wise Accident Analysis")
@@ -641,7 +872,7 @@ st.plotly_chart(
 )
 
 # =========================================================
-# 16. BOROUGH-WISE ACCIDENT ANALYSIS
+# 17. BOROUGH-WISE ACCIDENT ANALYSIS
 # =========================================================
 st.divider()
 st.header("5. Borough-wise Accident Analysis")
@@ -676,7 +907,7 @@ st.plotly_chart(
 )
 
 # =========================================================
-# 17. TOP CONTRIBUTING FACTORS
+# 18. TOP CONTRIBUTING FACTORS
 # =========================================================
 st.divider()
 st.header("6. Top Contributing Factors")
@@ -716,7 +947,7 @@ else:
     st.info("No contributing-factor records available.")
 
 # =========================================================
-# 18. VEHICLE TYPE ANALYSIS
+# 19. VEHICLE TYPE ANALYSIS
 # =========================================================
 st.divider()
 st.header("7. Vehicle Type Analysis")
@@ -755,7 +986,7 @@ else:
     st.info("No vehicle-type records available.")
 
 # =========================================================
-# 19. GEOGRAPHICAL ACCIDENT MAP
+# 20. GEOGRAPHICAL ACCIDENT MAP
 # =========================================================
 st.divider()
 st.header("8. Geographical Accident Map")
@@ -865,7 +1096,7 @@ else:
     )
 
 # =========================================================
-# 20. DBSCAN ACCIDENT HOTSPOT MAP
+# 21. DBSCAN ACCIDENT HOTSPOT MAP
 # =========================================================
 st.divider()
 st.header("9. Accident Hotspot Detection Map")
@@ -885,8 +1116,8 @@ if HOTSPOT_MAP_PATH.exists():
         ) as file:
             map_html = file.read()
 
-        components.html(
-            map_html,
+        st.iframe(
+            src=map_html,
             height=650,
             scrolling=True
         )
@@ -903,7 +1134,7 @@ else:
     )
 
 # =========================================================
-# 21. ACCIDENT DATA EXPLORER
+# 22. ACCIDENT DATA EXPLORER
 # =========================================================
 st.divider()
 st.header("10. Accident Data Explorer")
@@ -973,7 +1204,7 @@ st.caption(
 )
 
 # =========================================================
-# 22. DOWNLOAD FILTERED DATA
+# 23. DOWNLOAD FILTERED DATA
 # =========================================================
 st.divider()
 st.header("📥 Download Accident Data")
@@ -1004,19 +1235,30 @@ if st.button("Prepare CSV download"):
     )
 
 # =========================================================
-# 23. FOOTER
+# 24. FOOTER
 # =========================================================
 st.divider()
 
-st.markdown("""
+st.markdown(f"""
 <div style="
     text-align:center;
-    color:#334155;
+    color:{TEXT};
+    background-color:{PANEL};
+    border:1px solid {BORDER};
+    border-radius:12px;
     padding:20px;
 ">
-    <h4>Smart Traffic & Accident Intelligence System</h4>
-    <p>Data Science and Machine Learning Project</p>
-    <p>Dataset: NYC Motor Vehicle Collisions – Crashes</p>
-    <p>Built with Python, Streamlit, Pandas and Plotly</p>
+    <h4 style="color:{TEXT};">
+        Smart Traffic & Accident Intelligence System
+    </h4>
+    <p style="color:{MUTED};">
+        Data Science and Machine Learning Project
+    </p>
+    <p style="color:{MUTED};">
+        Dataset: NYC Motor Vehicle Collisions – Crashes
+    </p>
+    <p style="color:{MUTED};">
+        Built with Python, Streamlit, Pandas and Plotly
+    </p>
 </div>
 """, unsafe_allow_html=True)
