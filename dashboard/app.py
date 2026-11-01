@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 from pathlib import Path
-import streamlit.components.v1 as components
 
 # =========================================================
 # 1. PAGE CONFIGURATION
@@ -893,12 +892,11 @@ st.plotly_chart(
 st.divider()
 st.header("6. Top Contributing Factors")
 
+factor_series = filtered_df["factor"].astype(str)
+
 factor_data = (
-    filtered_df["factor"]
-    .astype(str)
-    .loc[
-        filtered_df["factor"].astype(str).str.lower()
-        != "unspecified"
+    factor_series.loc[
+        factor_series.str.lower() != "unspecified"
     ]
     .value_counts()
     .head(10)
@@ -933,12 +931,11 @@ else:
 st.divider()
 st.header("7. Vehicle Type Analysis")
 
+vehicle_series = filtered_df["vehicle"].astype(str)
+
 vehicle_data = (
-    filtered_df["vehicle"]
-    .astype(str)
-    .loc[
-        filtered_df["vehicle"].astype(str).str.lower()
-        != "unknown"
+    vehicle_series.loc[
+        vehicle_series.str.lower() != "unknown"
     ]
     .value_counts()
     .head(10)
@@ -1087,22 +1084,16 @@ st.caption(
     "generated during Phase 4."
 )
 
-if HOTSPOT_MAP_PATH.exists():
+if HOTSPOT_MAP_PATH.is_file():
 
     try:
-        with open(
+        # Correct current Streamlit API:
+        # Pass the local HTML Path directly.
+        # Do not pass scrolling or HTML contents as a string.
+        st.iframe(
             HOTSPOT_MAP_PATH,
-            "r",
-            encoding="utf-8"
-        ) as file:
-            map_html = file.read()
-
-        # FIX: Render HTML using components.html.
-        # st.iframe expects a URL and does not accept scrolling.
-        components.html(
-            map_html,
-            height=650,
-            scrolling=True
+            width="stretch",
+            height=650
         )
 
     except Exception as error:
@@ -1112,8 +1103,8 @@ if HOTSPOT_MAP_PATH.exists():
 
 else:
     st.info(
-        "Hotspot map not found. Check "
-        "visualizations/maps/accident_hotspot_map.html."
+        "Hotspot map not found. Check that this file exists: "
+        "visualizations/maps/accident_hotspot_map.html"
     )
 
 # =========================================================
