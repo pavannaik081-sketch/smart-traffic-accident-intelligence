@@ -399,32 +399,32 @@ def load_data(file_source):
         errors="coerce"
     )
 
-    df["crash_time"] = df["crash_time"].astype("string")
+    df["crash_time"] = df["crash_time"].fillna("00:00").astype(str)
 
     df["crash_hour"] = pd.to_numeric(
-        df["crash_time"].str.extract(r"^(\d{1,2})")[0],
+        df["crash_time"].str.slice(0, 2),
         errors="coerce"
-    )
+    ).fillna(0).astype("int8")
 
     df["latitude"] = pd.to_numeric(
         df["latitude"],
         errors="coerce"
-    )
+    ).astype("float32")
 
     df["longitude"] = pd.to_numeric(
         df["longitude"],
         errors="coerce"
-    )
+    ).astype("float32")
 
     df["injured"] = pd.to_numeric(
         df["number_of_persons_injured"],
         errors="coerce"
-    ).fillna(0)
+    ).fillna(0).astype("int16")
 
     df["killed"] = pd.to_numeric(
         df["number_of_persons_killed"],
         errors="coerce"
-    ).fillna(0)
+    ).fillna(0).astype("int16")
 
     df["borough"] = (
         df["borough"]
@@ -444,22 +444,38 @@ def load_data(file_source):
         .astype("category")
     )
 
-    df["severity"] = np.select(
-        [
-            df["killed"] > 0,
-            df["injured"] > 0
-        ],
-        [
-            "Fatal",
-            "Injury"
-        ],
-        default="Property Damage"
+    df["severity"] = pd.Categorical(
+        np.select(
+            [
+                df["killed"] > 0,
+                df["injured"] > 0
+            ],
+            [
+                "Fatal",
+                "Injury"
+            ],
+            default="Property Damage"
+        )
     )
 
-    df["year"] = df["crash_date"].dt.year
-    df["month"] = df["crash_date"].dt.month
-    df["month_name"] = df["crash_date"].dt.strftime("%b")
-    df["day_of_week"] = df["crash_date"].dt.day_name()
+    df["year"] = df["crash_date"].dt.year.fillna(0).astype("int16")
+    df["month"] = df["crash_date"].dt.month.fillna(0).astype("int8")
+
+    month_names = {
+        1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr",
+        5: "May", 6: "Jun", 7: "Jul", 8: "Aug",
+        9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec", 0: "Unknown"
+    }
+    df["month_name"] = pd.Categorical(df["month"].map(month_names))
+
+    day_names = {
+        0: "Monday", 1: "Tuesday", 2: "Wednesday",
+        3: "Thursday", 4: "Friday", 5: "Saturday",
+        6: "Sunday", -1: "Unknown"
+    }
+    df["day_of_week"] = pd.Categorical(
+        df["crash_date"].dt.dayofweek.fillna(-1).astype("int8").map(day_names)
+    )
 
     return df
 
@@ -1085,14 +1101,20 @@ st.caption(
 if HOTSPOT_MAP_PATH.is_file():
 
     try:
-        # Correct current Streamlit API:
-        # Pass the local HTML Path directly.
-        # Do not pass scrolling or HTML contents as a string.
-        st.iframe(
-            HOTSPOT_MAP_PATH,
-            width="stretch",
-            height=650
-        )
+        if hasattr(st, "iframe"):
+            st.iframe(
+                HOTSPOT_MAP_PATH,
+                width="stretch",
+                height=650
+            )
+        else:
+            import streamlit.components.v1 as components
+            with open(HOTSPOT_MAP_PATH, "r", encoding="utf-8") as map_file:
+                components.html(
+                    map_file.read(),
+                    height=650,
+                    scrolling=True
+                )
 
     except Exception as error:
         st.error(
