@@ -1,0 +1,2 @@
+Model,Accuracy,Balanced Accuracy,Macro Precision,Macro Recall,Macro F1-Score
+Random Forest,0.691525,0.4558001244402032,0.4253047430224742,0.4558001244402032,0.43277995833772215

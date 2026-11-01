@@ -1,0 +1,19 @@
+# Virtual environment
+.venv/
+venv/
+
+# Large original dataset
+dataset/raw/traffic_accidents.csv
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment files
+.env
+
+# Jupyter temporary files
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/

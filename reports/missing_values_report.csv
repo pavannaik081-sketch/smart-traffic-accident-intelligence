@@ -1,0 +1,30 @@
+Column,Missing_Count,Missing_Percentage
+vehicle type code 5,2291475,99.56
+contributing factor vehicle 5,2291136,99.54
+vehicle type code 4,2264762,98.4
+contributing factor vehicle 4,2263318,98.33
+vehicle type code 3,2141423,93.04
+contributing factor vehicle 3,2134534,92.74
+cross street name,1884385,81.87
+off street name,885473,38.47
+zip code,699226,30.38
+borough,674813,29.32
+on street name,509678,22.14
+vehicle type code 2,474109,20.6
+contributing factor vehicle 2,373602,16.23
+location,240734,10.46
+latitude,240734,10.46
+longitude,240734,10.46
+vehicle type code 1,17652,0.77
+contributing factor vehicle 1,8224,0.36
+crash date,0,0.0
+number of persons injured,18,0.0
+crash time,0,0.0
+number of pedestrians injured,0,0.0
+number of persons killed,31,0.0
+number of motorist killed,0,0.0
+number of motorist injured,0,0.0
+number of pedestrians killed,0,0.0
+number of cyclist injured,0,0.0
+number of cyclist killed,0,0.0
+collision_id,0,0.0

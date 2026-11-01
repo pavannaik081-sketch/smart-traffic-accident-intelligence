@@ -1,0 +1,30 @@
+Column,Data_Type
+crash date,str
+crash time,str
+borough,str
+zip code,float64
+latitude,float64
+longitude,float64
+location,str
+on street name,str
+cross street name,str
+off street name,str
+number of persons injured,float64
+number of persons killed,float64
+number of pedestrians injured,int64
+number of pedestrians killed,int64
+number of cyclist injured,int64
+number of cyclist killed,int64
+number of motorist injured,int64
+number of motorist killed,int64
+contributing factor vehicle 1,str
+contributing factor vehicle 2,str
+contributing factor vehicle 3,str
+contributing factor vehicle 4,str
+contributing factor vehicle 5,str
+collision_id,str
+vehicle type code 1,str
+vehicle type code 2,str
+vehicle type code 3,str
+vehicle type code 4,str
+vehicle type code 5,str

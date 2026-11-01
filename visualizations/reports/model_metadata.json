@@ -1,0 +1,33 @@
+{
+    "project": "Smart Traffic Intelligence System",
+    "target": "severity",
+    "severity_categories": [
+        "Fatal",
+        "Injury",
+        "Property Damage"
+    ],
+    "numerical_features": [
+        "crash_hour",
+        "crash_year",
+        "crash_month",
+        "day_of_week",
+        "hour_sin",
+        "hour_cos",
+        "month_sin",
+        "month_cos"
+    ],
+    "categorical_features": [
+        "borough",
+        "zip_code",
+        "factor",
+        "vehicle"
+    ],
+    "training_records": 160000,
+    "testing_records": 40000,
+    "random_forest_metrics": {
+        "Accuracy": 0.691525,
+        "Macro Precision": 0.4253047430224742,
+        "Macro Recall": 0.4558001244402032,
+        "Macro F1-Score": 0.43277995833772215
+    }
+}
