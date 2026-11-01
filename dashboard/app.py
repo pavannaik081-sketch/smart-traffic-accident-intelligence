@@ -55,8 +55,6 @@ else:
 # =========================================================
 st.markdown(f"""
 <style>
-
-/* Main application */
 .stApp {{
     background-color: {BG};
     color: {TEXT};
@@ -78,13 +76,11 @@ st.markdown(f"""
     max-width: 1600px;
 }}
 
-/* All headings */
 h1, h2, h3, h4, h5, h6 {{
     color: {TEXT} !important;
     overflow-wrap: anywhere;
 }}
 
-/* General text */
 p, span, label, li, small, div {{
     color: inherit;
 }}
@@ -100,7 +96,6 @@ p, span, label, li, small, div {{
     font-size: 16px;
 }}
 
-/* Sidebar */
 section[data-testid="stSidebar"] {{
     background-color: {SIDEBAR};
     border-right: 1px solid {BORDER};
@@ -114,7 +109,6 @@ section[data-testid="stSidebar"] label {{
     font-weight: 600;
 }}
 
-/* Metrics */
 [data-testid="stMetric"] {{
     background-color: {PANEL};
     border: 1px solid {BORDER};
@@ -132,7 +126,6 @@ section[data-testid="stSidebar"] label {{
     overflow-wrap: anywhere;
 }}
 
-/* Input controls */
 .stTextInput input,
 .stNumberInput input,
 .stDateInput input,
@@ -144,7 +137,6 @@ section[data-testid="stSidebar"] label {{
     border-color: {BORDER} !important;
 }}
 
-/* Dropdown menus */
 [data-baseweb="popover"],
 [data-baseweb="menu"],
 [data-baseweb="select"] {{
@@ -157,13 +149,11 @@ section[data-testid="stSidebar"] label {{
     color: {TEXT} !important;
 }}
 
-/* Radio buttons and checkboxes */
 .stRadio label,
 .stCheckbox label {{
     color: {TEXT} !important;
 }}
 
-/* Buttons */
 .stButton button,
 .stDownloadButton button {{
     background-color: {ACCENT} !important;
@@ -184,19 +174,16 @@ section[data-testid="stSidebar"] label {{
     opacity: 0.85;
 }}
 
-/* Tables */
 [data-testid="stDataFrame"],
 [data-testid="stTable"] {{
     border: 1px solid {BORDER};
     border-radius: 10px;
 }}
 
-/* Alerts and information boxes */
 [data-testid="stAlert"] {{
     border-radius: 10px;
 }}
 
-/* Plotly chart containers */
 [data-testid="stPlotlyChart"] {{
     background-color: {PANEL};
     border: 1px solid {BORDER};
@@ -205,18 +192,15 @@ section[data-testid="stSidebar"] label {{
     overflow: hidden;
 }}
 
-/* Captions */
 .stCaption,
 [data-testid="stCaptionContainer"] {{
     color: {MUTED} !important;
 }}
 
-/* Dividers */
 hr {{
     border-color: {BORDER} !important;
 }}
 
-/* Responsive layout - tablets */
 @media screen and (max-width: 1024px) {{
     .block-container {{
         padding-left: 3%;
@@ -232,7 +216,6 @@ hr {{
     }}
 }}
 
-/* Responsive layout - mobile */
 @media screen and (max-width: 768px) {{
     .block-container {{
         padding: 1rem 0.8rem 2rem 0.8rem;
@@ -277,7 +260,6 @@ hr {{
     }}
 }}
 
-/* Smaller phones */
 @media screen and (max-width: 480px) {{
     .block-container {{
         padding-left: 0.6rem;
@@ -304,7 +286,6 @@ hr {{
         font-size: 13px;
     }}
 }}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -1116,8 +1097,10 @@ if HOTSPOT_MAP_PATH.exists():
         ) as file:
             map_html = file.read()
 
-        st.iframe(
-            src=map_html,
+        # FIX: Render HTML using components.html.
+        # st.iframe expects a URL and does not accept scrolling.
+        components.html(
+            map_html,
             height=650,
             scrolling=True
         )
