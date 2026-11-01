@@ -216,15 +216,30 @@ def style_chart(fig):
     return fig
 
 # =========================================================
-# 3. PROJECT PATHS
+# 3. PROJECT PATHS AND DATA SOURCE
 # =========================================================
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-DATA_PATH = (
+# Public Hugging Face CSV dataset URL
+DATA_URL = (
+    "https://huggingface.co/datasets/"
+    "pavan-data-lab/nyc-traffic-accidents/resolve/main/"
+    "traffic_accidents_dashboard.csv"
+)
+
+# Local dataset fallback
+LOCAL_DATA_PATH = (
     PROJECT_ROOT
     / "dataset"
     / "raw"
     / "traffic_accidents.csv"
+)
+
+# Use local dataset if available, otherwise Hugging Face
+DATA_SOURCE = (
+    str(LOCAL_DATA_PATH)
+    if LOCAL_DATA_PATH.exists()
+    else DATA_URL
 )
 
 HOTSPOT_MAP_PATH = (
@@ -238,7 +253,8 @@ HOTSPOT_MAP_PATH = (
 # 4. LOAD DATASET
 # =========================================================
 @st.cache_data(show_spinner="Loading accident dataset...")
-def load_data(file_path):
+def load_data(file_source):
+
     required_columns = {
         "crash_date",
         "crash_time",
@@ -259,7 +275,7 @@ def load_data(file_path):
         )
 
     df = pd.read_csv(
-        file_path,
+        file_source,
         low_memory=False,
         usecols=lambda column: (
             normalize_column(column) in required_columns
@@ -270,6 +286,14 @@ def load_data(file_path):
         normalize_column(column)
         for column in df.columns
     ]
+
+    missing_columns = required_columns.difference(df.columns)
+
+    if missing_columns:
+        raise ValueError(
+            "The dataset is missing required columns: "
+            + ", ".join(sorted(missing_columns))
+        )
 
     df["crash_date"] = pd.to_datetime(
         df["crash_date"],
@@ -358,18 +382,27 @@ st.markdown(
 # =========================================================
 # 6. CHECK AND LOAD DATASET
 # =========================================================
-if not DATA_PATH.exists():
-    st.error(f"Dataset not found: {DATA_PATH}")
-    st.info(
-        "Make sure traffic_accidents.csv exists inside "
-        "dataset/raw/."
+st.info(
+    "Dataset source: "
+    + (
+        "Local CSV file"
+        if DATA_SOURCE == str(LOCAL_DATA_PATH)
+        else "Hugging Face"
     )
-    st.stop()
+)
 
 try:
-    df = load_data(str(DATA_PATH))
+    df = load_data(DATA_SOURCE)
+
 except Exception as error:
     st.error(f"Dataset loading error: {error}")
+
+    st.warning(
+        "The dashboard could not download or read the dataset. "
+        "Check that the Hugging Face dataset is public and that "
+        "the CSV filename and URL are correct."
+    )
+
     st.stop()
 
 st.sidebar.success(
@@ -401,9 +434,8 @@ date_range = st.sidebar.date_input(
     max_value=max_date
 )
 
-# FIX: Safely handle date_input returning a tuple,
-# a single date, or a partially selected date range.
 if isinstance(date_range, (tuple, list)):
+
     selected_dates = [
         value for value in date_range
         if value is not None
@@ -411,10 +443,13 @@ if isinstance(date_range, (tuple, list)):
 
     if len(selected_dates) == 2:
         start_date, end_date = selected_dates
+
     elif len(selected_dates) == 1:
         start_date = end_date = selected_dates[0]
+
     else:
         start_date, end_date = min_date, max_date
+
 else:
     start_date = end_date = date_range
 
@@ -449,7 +484,6 @@ selected_severities = st.sidebar.multiselect(
 # =========================================================
 # 8. FILTER DATA
 # =========================================================
-# FIX: Compare date objects with date objects.
 crash_dates = df["crash_date"].dt.date
 
 date_mask = (
@@ -563,6 +597,7 @@ severity_data.columns = ["Severity", "Accidents"]
 col1, col2 = st.columns(2)
 
 with col1:
+
     fig = px.pie(
         severity_data,
         names="Severity",
@@ -590,6 +625,7 @@ with col1:
     )
 
 with col2:
+
     fig = px.bar(
         severity_data,
         x="Severity",
@@ -620,6 +656,7 @@ st.header("2. Time-Based Accident Analysis")
 col1, col2 = st.columns(2)
 
 with col1:
+
     yearly_data = (
         filtered_df.dropna(subset=["year"])
         .groupby("year")
@@ -647,6 +684,7 @@ with col1:
     )
 
 with col2:
+
     monthly_data = (
         filtered_df.dropna(subset=["month"])
         .groupby("month")
@@ -810,6 +848,7 @@ factor_data = (
 )
 
 if not factor_data.empty:
+
     fig = px.bar(
         factor_data,
         x="Accidents",
@@ -834,6 +873,7 @@ if not factor_data.empty:
             "responsive": True
         }
     )
+
 else:
     st.info("No contributing-factor records available.")
 
@@ -854,6 +894,7 @@ vehicle_data = (
 )
 
 if not vehicle_data.empty:
+
     fig = px.bar(
         vehicle_data,
         x="Accidents",
@@ -877,6 +918,7 @@ if not vehicle_data.empty:
             "responsive": True
         }
     )
+
 else:
     st.info("No vehicle-type records available.")
 
@@ -905,6 +947,7 @@ st.write(
 )
 
 if not map_df.empty:
+
     map_sample = map_df.sample(
         n=min(map_point_limit, len(map_df)),
         random_state=42
@@ -954,6 +997,7 @@ if not map_df.empty:
     )
 
     if not map_plot_data.empty:
+
         fig = px.scatter_map(
             map_plot_data,
             lat="latitude",
@@ -1015,10 +1059,12 @@ if not map_df.empty:
             f"Displaying {len(map_plot_data):,} accident locations "
             f"from {len(map_df):,} valid records."
         )
+
     else:
         st.warning(
             "No valid numerical coordinates available for the map."
         )
+
 else:
     st.warning(
         "No valid NYC geographical coordinates were found "
@@ -1037,12 +1083,14 @@ st.caption(
 )
 
 if HOTSPOT_MAP_PATH.exists():
+
     try:
         with open(
             HOTSPOT_MAP_PATH,
             "r",
             encoding="utf-8"
         ) as file:
+
             map_html = file.read()
 
         components.html(
@@ -1050,10 +1098,12 @@ if HOTSPOT_MAP_PATH.exists():
             height=650,
             scrolling=True
         )
+
     except Exception as error:
         st.error(
             f"Unable to display hotspot map: {error}"
         )
+
 else:
     st.info(
         "Hotspot map not found. Check "
@@ -1103,6 +1153,7 @@ selected_table_columns = st.multiselect(
 explorer_df = filtered_df.copy()
 
 if search_text.strip():
+
     search_mask = explorer_df[
         available_display_columns
     ].astype(str).apply(
@@ -1117,10 +1168,13 @@ if search_text.strip():
     explorer_df = explorer_df.loc[search_mask]
 
 if not selected_table_columns:
+
     st.info(
         "Select at least one column to display accident records."
     )
+
 else:
+
     st.dataframe(
         explorer_df[selected_table_columns].head(data_table_limit),
         use_container_width=True,
