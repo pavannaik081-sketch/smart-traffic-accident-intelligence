@@ -65,23 +65,6 @@ st.session_state["sidebar_domain_selector"] = st.session_state["active_domain"]
 # =========================================================
 # 3. THEME & APPEARANCE SYSTEM
 # =========================================================
-st.sidebar.markdown("""
-<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="5"></circle>
-        <line x1="12" y1="1" x2="12" y2="3"></line>
-        <line x1="12" y1="21" x2="12" y2="23"></line>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-        <line x1="1" y1="12" x2="3" y2="12"></line>
-        <line x1="21" y1="12" x2="23" y2="12"></line>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-    </svg>
-    <span style="font-size: 15px; font-weight: 700; letter-spacing: 0.5px;">Dashboard Appearance</span>
-</div>
-""", unsafe_allow_html=True)
-
 theme_choice = st.sidebar.radio(
     "Theme Mode",
     ["Dark Mode", "Light Mode"],
@@ -105,7 +88,7 @@ if DARK_MODE:
     INPUT_BORDER = "#3b4f6f"
     ACCENT_BLUE = "#38bdf8"
     ACCENT_PURPLE = "#a855f7"
-    TAB_INACTIVE = "#e2e8f0"
+    TAB_INACTIVE = "#f8fafc"
     COLOR_FATAL = "#ef4444"
     COLOR_INJURY = "#f59e0b"
     COLOR_DAMAGE = "#38bdf8"
@@ -125,13 +108,31 @@ else:
     INPUT_BORDER = "#94a3b8"
     ACCENT_BLUE = "#0284c7"
     ACCENT_PURPLE = "#9333ea"
-    TAB_INACTIVE = "#334155"
+    TAB_INACTIVE = "#0f172a"
     COLOR_FATAL = "#dc2626"
     COLOR_INJURY = "#d97706"
     COLOR_DAMAGE = "#0284c7"
     GRID_COLOR = "#e2e8f0"
     BUTTON_GRADIENT = "linear-gradient(135deg, #1d4ed8, #2563eb)"
     PLOTLY_TEMPLATE = "plotly_white"
+
+# High-contrast Dashboard Appearance label
+st.sidebar.markdown(f"""
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{TEXT_MAIN}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+    <span style="color: {TEXT_MAIN} !important; font-size: 15px; font-weight: 800; letter-spacing: 0.5px;">Dashboard Appearance</span>
+</div>
+""", unsafe_allow_html=True)
 
 SEVERITY_COLORS = {
     "Property Damage": COLOR_DAMAGE,
@@ -179,9 +180,34 @@ st.markdown(f"""
         color: {TEXT_MAIN} !important;
         font-weight: 700;
     }}
-    
-    p, span, label, div {{
-        color: inherit;
+
+    /* Global Widget Labels - 100% High Contrast */
+    label,
+    label p,
+    label span,
+    label div,
+    [data-testid="stWidgetLabel"],
+    [data-testid="stWidgetLabel"] p,
+    [data-testid="stWidgetLabel"] span,
+    [data-testid="stWidgetLabel"] label,
+    .stSelectbox label p,
+    .stMultiSelect label p,
+    .stTextInput label p,
+    .stNumberInput label p,
+    .stDateInput label p,
+    .stSlider label p,
+    .stRadio label p {{
+        color: {TEXT_MAIN} !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        opacity: 1 !important;
+        letter-spacing: 0.2px;
+    }}
+
+    .stCaption, [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p {{
+        color: {TEXT_MUTED} !important;
+        font-size: 13.5px !important;
+        opacity: 1 !important;
     }}
     
     /* Sidebar */
@@ -194,30 +220,73 @@ st.markdown(f"""
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3,
     section[data-testid="stSidebar"] label,
-    section[data-testid="stSidebar"] p {{
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] span {{
         color: {TEXT_MAIN} !important;
     }}
+
+    /* Sidebar Radio Options */
+    div[role="radiogroup"] label,
+    div[role="radiogroup"] label p,
+    div[role="radiogroup"] label span,
+    div[role="radiogroup"] label div {{
+        color: {TEXT_MAIN} !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        opacity: 1 !important;
+    }}
     
-    /* Input Elements, Selectboxes, Multiselects */
-    .stSelectbox div[data-baseweb="select"],
-    .stMultiSelect div[data-baseweb="select"],
+    /* Selectboxes, Multiselects & Text Inputs - Light & Dark Mode */
+    .stSelectbox div[data-baseweb="select"] > div,
+    .stMultiSelect div[data-baseweb="select"] > div,
+    div[data-baseweb="select"] > div,
     .stTextInput input,
     .stNumberInput input,
-    .stDateInput input {{
+    .stDateInput input,
+    div[data-baseweb="input"],
+    div[data-baseweb="input"] > input {{
         background-color: {INPUT_BG} !important;
         color: {INPUT_TEXT} !important;
         border: 1.5px solid {INPUT_BORDER} !important;
         border-radius: 8px !important;
     }}
-    
-    /* Multiselect text & tags */
-    .stMultiSelect div[data-baseweb="select"] span {{
-        color: {INPUT_TEXT} !important;
-    }}
-    
+
+    /* Selected value text inside selectbox */
+    .stSelectbox div[data-baseweb="select"] [role="combobox"],
+    .stSelectbox div[data-baseweb="select"] span,
     .stSelectbox div[data-baseweb="select"] div,
-    .stMultiSelect div[data-baseweb="select"] div {{
+    .stTextInput input,
+    .stNumberInput input,
+    .stDateInput input {{
         color: {INPUT_TEXT} !important;
+        -webkit-text-fill-color: {INPUT_TEXT} !important;
+        font-weight: 600 !important;
+    }}
+
+    /* Selectbox Chevron and Icons */
+    div[data-baseweb="select"] svg {{
+        fill: {TEXT_MAIN} !important;
+        color: {TEXT_MAIN} !important;
+    }}
+
+    /* Multiselect Tags / Pills */
+    span[data-baseweb="tag"],
+    div[data-baseweb="tag"] {{
+        background-color: {SURFACE_CARD} !important;
+        border: 1px solid {BORDER_COLOR} !important;
+        border-radius: 6px !important;
+    }}
+    span[data-baseweb="tag"] span,
+    span[data-baseweb="tag"] div,
+    div[data-baseweb="tag"] span,
+    div[data-baseweb="tag"] div {{
+        color: {TEXT_MAIN} !important;
+        font-weight: 600 !important;
+    }}
+    span[data-baseweb="tag"] svg,
+    div[data-baseweb="tag"] svg {{
+        fill: {TEXT_MUTED} !important;
+        color: {TEXT_MUTED} !important;
     }}
     
     /* Dropdown Menus and Popovers */
@@ -229,12 +298,38 @@ st.markdown(f"""
         color: {TEXT_MAIN} !important;
     }}
     
-    li[role="option"]:hover {{
+    li[role="option"]:hover,
+    li[role="option"][aria-selected="true"] {{
         background-color: {SURFACE_CARD} !important;
     }}
     
     li[role="option"] * {{
         color: {TEXT_MAIN} !important;
+    }}
+
+    /* Sliders - 100% High Contrast */
+    [data-testid="stSlider"],
+    [data-testid="stSlider"] label,
+    [data-testid="stSlider"] label p,
+    [data-testid="stSlider"] label span,
+    [data-testid="stSlider"] div[data-testid="stWidgetLabel"],
+    [data-testid="stSlider"] div[data-testid="stWidgetLabel"] p,
+    [data-testid="stSlider"] div[data-testid="stWidgetLabel"] span {{
+        color: {TEXT_MAIN} !important;
+        font-weight: 700 !important;
+        opacity: 1 !important;
+    }}
+
+    [data-testid="stSlider"] div[data-testid="stThumbValue"] {{
+        color: {ACCENT_BLUE} !important;
+        font-weight: 800 !important;
+        font-size: 14px !important;
+    }}
+
+    [data-testid="stSlider"] div[data-testid="stTickBarMin"],
+    [data-testid="stSlider"] div[data-testid="stTickBarMax"] {{
+        color: {TEXT_MUTED} !important;
+        font-weight: 600 !important;
     }}
 
     /* Metrics Cards */
@@ -254,41 +349,43 @@ st.markdown(f"""
     
     [data-testid="stMetricLabel"] p {{
         font-size: 13px !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
         color: {TEXT_MUTED} !important;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }}
     
-    [data-testid="stMetricValue"] {{
+    [data-testid="stMetricValue"], [data-testid="stMetricValue"] div {{
         font-size: 26px !important;
-        font-weight: 700 !important;
+        font-weight: 800 !important;
         color: {TEXT_MAIN} !important;
     }}
     
-    /* Tabs Navigation - High Contrast in Both Modes */
-    button[data-baseweb="tab"] {{
+    /* Tabs Navigation - Maximum Visibility in Both Modes */
+    button[data-baseweb="tab"],
+    button[data-baseweb="tab"] *,
+    div[data-baseweb="tab-list"] button,
+    div[data-baseweb="tab-list"] button * {{
         color: {TAB_INACTIVE} !important;
-        font-weight: 600 !important;
-        font-size: 14.5px !important;
-        background: transparent !important;
-        padding: 10px 18px !important;
-        opacity: 0.9 !important;
-    }}
-    
-    button[data-baseweb="tab"] * {{
-        color: inherit !important;
-    }}
-    
-    button[data-baseweb="tab"][aria-selected="true"] {{
-        color: {ACCENT_BLUE} !important;
-        border-bottom: 3px solid {ACCENT_BLUE} !important;
         font-weight: 700 !important;
+        font-size: 14.5px !important;
         opacity: 1 !important;
+        background: transparent !important;
     }}
     
-    button[data-baseweb="tab"]:hover {{
-        color: {TEXT_MAIN} !important;
+    button[data-baseweb="tab"][aria-selected="true"],
+    button[data-baseweb="tab"][aria-selected="true"] *,
+    div[data-baseweb="tab-list"] button[aria-selected="true"],
+    div[data-baseweb="tab-list"] button[aria-selected="true"] * {{
+        color: {ACCENT_BLUE} !important;
+        font-weight: 800 !important;
+        opacity: 1 !important;
+        border-bottom: 3.5px solid {ACCENT_BLUE} !important;
+    }}
+    
+    button[data-baseweb="tab"]:hover,
+    button[data-baseweb="tab"]:hover * {{
+        color: {ACCENT_BLUE} !important;
         opacity: 1 !important;
     }}
 
@@ -325,7 +422,7 @@ st.markdown(f"""
         color: {TEXT_MAIN} !important;
         border: 1.5px solid {BORDER_COLOR} !important;
         border-radius: 8px !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
         padding: 0.55rem 1.1rem !important;
         min-height: 42px !important;
         transition: all 0.2s ease !important;
@@ -333,7 +430,7 @@ st.markdown(f"""
     
     button[kind="secondary"] * {{
         color: {TEXT_MAIN} !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
     }}
     
     button[kind="secondary"]:hover {{
@@ -453,6 +550,7 @@ def get_dataset():
     # Hour extraction
     time_series = df["crash_time"].fillna("00:00").astype(str)
     df["crash_hour"] = pd.to_numeric(time_series.str.slice(0, 2), errors="coerce").fillna(0).astype("int8")
+    df["crash_time"] = time_series.str.slice(0, 5).astype("category")
     
     # Coordinates
     df["latitude"] = pd.to_numeric(df["latitude"], errors="coerce").astype("float32")
@@ -474,7 +572,7 @@ def get_dataset():
     
     # Drop redundant raw columns to conserve memory
     df.drop(columns=[
-        "crash_time", "number_of_persons_injured", "number_of_persons_killed",
+        "number_of_persons_injured", "number_of_persons_killed",
         "contributing_factor_vehicle_1", "vehicle_type_code_1"
     ], inplace=True, errors="ignore")
 
@@ -529,12 +627,12 @@ st.sidebar.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-st.sidebar.markdown("""
+st.sidebar.markdown(f"""
 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{TEXT_MAIN}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
     </svg>
-    <span style="font-size: 14px; font-weight: 700;">Analysis Domain</span>
+    <span style="color: {TEXT_MAIN} !important; font-size: 14px; font-weight: 800;">Analysis Domain</span>
 </div>
 """, unsafe_allow_html=True)
 
@@ -554,13 +652,13 @@ selected_domain = st.session_state["active_domain"]
 
 st.sidebar.markdown(f"<hr style='margin: 15px 0; border-color: {BORDER_COLOR};'>", unsafe_allow_html=True)
 
-st.sidebar.markdown("""
+st.sidebar.markdown(f"""
 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{TEXT_MAIN}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
         <circle cx="12" cy="10" r="3"></circle>
     </svg>
-    <span style="font-size: 14px; font-weight: 700;">Borough Domain Focus</span>
+    <span style="color: {TEXT_MAIN} !important; font-size: 14px; font-weight: 800;">Borough Domain Focus</span>
 </div>
 """, unsafe_allow_html=True)
 
@@ -1418,7 +1516,11 @@ elif selected_domain == "Accident Data Explorer":
         
     chosen_cols = st.multiselect("Columns to view:", options=disp_cols, default=disp_cols)
     
-    explorer_data = filtered_df[chosen_cols].copy()
+    valid_cols = [c for c in chosen_cols if c in filtered_df.columns]
+    if not valid_cols:
+        valid_cols = [c for c in disp_cols if c in filtered_df.columns]
+        
+    explorer_data = filtered_df[valid_cols].copy()
     
     if search_query.strip():
         q = search_query.strip().lower()
