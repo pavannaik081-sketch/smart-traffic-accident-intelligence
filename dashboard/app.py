@@ -395,8 +395,12 @@ def get_dataset():
     def norm(col):
         return str(col).strip().lower().replace(" ", "_")
         
+    # Cloud-safe row limit to prevent exceeding container memory limits
+    max_cloud_rows = 600_000 if not source_path else None
+
     df = pd.read_csv(
         file_to_read,
+        nrows=max_cloud_rows,
         low_memory=False,
         usecols=lambda c: norm(c) in required_cols
     )
@@ -421,25 +425,34 @@ def get_dataset():
     
     # Categoricals with clean string sanitization
     df["borough"] = df["borough"].fillna("Unknown").astype(str).str.strip().str.upper()
-    df["borough"] = df["borough"].replace({"": "Unknown", "NAN": "Unknown"})
+    df["borough"] = df["borough"].replace({"": "Unknown", "NAN": "Unknown"}).astype("category")
     
     df["factor"] = df["contributing_factor_vehicle_1"].fillna("Unspecified").astype(str).str.strip()
-    df["factor"] = df["factor"].replace({"": "Unspecified", "NAN": "Unspecified", "1": "Unspecified"})
+    df["factor"] = df["factor"].replace({"": "Unspecified", "NAN": "Unspecified", "1": "Unspecified"}).astype("category")
     
     df["vehicle"] = df["vehicle_type_code_1"].fillna("Unknown").astype(str).str.strip()
-    df["vehicle"] = df["vehicle"].replace({"": "Unknown", "NAN": "Unknown"})
+    df["vehicle"] = df["vehicle"].replace({"": "Unknown", "NAN": "Unknown"}).astype("category")
     
+    # Drop redundant raw columns to conserve memory
+    df.drop(columns=[
+        "crash_time", "number_of_persons_injured", "number_of_persons_killed",
+        "contributing_factor_vehicle_1", "vehicle_type_code_1"
+    ], inplace=True, errors="ignore")
+
     # Severity calculation
     conditions = [df["killed"] > 0, df["injured"] > 0]
     choices = ["Fatal", "Injury"]
-    df["severity"] = np.select(conditions, choices, default="Property Damage")
+    df["severity"] = pd.Categorical(np.select(conditions, choices, default="Property Damage"))
     
     # Temporal attributes
     df["year"] = df["crash_date"].dt.year.astype("int16")
     df["month"] = df["crash_date"].dt.month.astype("int8")
-    df["month_name"] = df["crash_date"].dt.strftime("%b").fillna("Unknown")
-    df["day_of_week"] = df["crash_date"].dt.day_name().fillna("Unknown")
+    df["month_name"] = df["crash_date"].dt.strftime("%b").fillna("Unknown").astype("category")
+    df["day_of_week"] = df["crash_date"].dt.day_name().fillna("Unknown").astype("category")
     
+    import gc
+    gc.collect()
+
     return df, file_to_read
 
 @st.cache_data
@@ -512,7 +525,7 @@ st.sidebar.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-available_boroughs = sorted([b for b in df["borough"].unique() if b])
+available_boroughs = sorted([str(b) for b in df["borough"].dropna().unique() if str(b).strip()])
 borough_options_list = ["All NYC Boroughs", "Custom Multi-Borough"] + available_boroughs
 
 borough_choice = st.sidebar.selectbox(
@@ -979,7 +992,7 @@ elif selected_domain == "Vehicles & Contributing Factors":
     with v1:
         st.markdown("#### Top 10 Reported Contributing Factors")
         factors = filtered_df["factor"].loc[
-            ~filtered_df["factor"].str.lower().isin(["unspecified", "unknown", ""])
+            ~filtered_df["factor"].astype(str).str.lower().isin(["unspecified", "unknown", ""])
         ].value_counts().head(10).reset_index()
         factors.columns = ["Factor", "Accidents"]
         
@@ -1000,7 +1013,7 @@ elif selected_domain == "Vehicles & Contributing Factors":
     with v2:
         st.markdown("#### Top 10 Vehicle Types Involved")
         vehicles = filtered_df["vehicle"].loc[
-            ~filtered_df["vehicle"].str.lower().isin(["unknown", "unspecified", ""])
+            ~filtered_df["vehicle"].astype(str).str.lower().isin(["unknown", "unspecified", ""])
         ].value_counts().head(10).reset_index()
         vehicles.columns = ["Vehicle_Type", "Accidents"]
         
@@ -1022,7 +1035,7 @@ elif selected_domain == "Vehicles & Contributing Factors":
     st.markdown("#### Fatal & Injury Collision Primary Causes")
     severe_factors = filtered_df.loc[
         filtered_df["severity"].isin(["Injury", "Fatal"]) &
-        ~filtered_df["factor"].str.lower().isin(["unspecified", "unknown", ""])
+        ~filtered_df["factor"].astype(str).str.lower().isin(["unspecified", "unknown", ""])
     ]["factor"].value_counts().head(8).reset_index()
     severe_factors.columns = ["Contributing Factor", "Casualty Crashes"]
     
