@@ -18,18 +18,5 @@ __pycache__/
 # VS Code
 .vscode/
 
-# Large generated datasets
-dataset/processed/*.csv
-
-# Large trained models
-models/*.pkl
-
-# Python environment
-.venv/
-venv/
-
 # Large processed datasets
 dataset/processed/*.csv
-
-# Large trained models
-models/*.pkl

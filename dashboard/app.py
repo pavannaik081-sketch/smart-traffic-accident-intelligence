@@ -98,13 +98,14 @@ if DARK_MODE:
     SURFACE_CARD = "#192237"
     SIDEBAR_BG = "#0d1424"
     TEXT_MAIN = "#f8fafc"
-    TEXT_MUTED = "#94a3b8"
+    TEXT_MUTED = "#cbd5e1"
     BORDER_COLOR = "#23304a"
     INPUT_BG = "#162032"
     INPUT_TEXT = "#f8fafc"
-    INPUT_BORDER = "#334155"
+    INPUT_BORDER = "#3b4f6f"
     ACCENT_BLUE = "#38bdf8"
     ACCENT_PURPLE = "#a855f7"
+    TAB_INACTIVE = "#e2e8f0"
     COLOR_FATAL = "#ef4444"
     COLOR_INJURY = "#f59e0b"
     COLOR_DAMAGE = "#38bdf8"
@@ -117,13 +118,14 @@ else:
     SURFACE_CARD = "#f1f5f9"
     SIDEBAR_BG = "#ffffff"
     TEXT_MAIN = "#0f172a"
-    TEXT_MUTED = "#475569"
+    TEXT_MUTED = "#334155"
     BORDER_COLOR = "#cbd5e1"
     INPUT_BG = "#ffffff"
     INPUT_TEXT = "#0f172a"
     INPUT_BORDER = "#94a3b8"
     ACCENT_BLUE = "#0284c7"
     ACCENT_PURPLE = "#9333ea"
+    TAB_INACTIVE = "#334155"
     COLOR_FATAL = "#dc2626"
     COLOR_INJURY = "#d97706"
     COLOR_DAMAGE = "#0284c7"
@@ -264,27 +266,34 @@ st.markdown(f"""
         color: {TEXT_MAIN} !important;
     }}
     
-    /* Tabs Navigation */
+    /* Tabs Navigation - High Contrast in Both Modes */
     button[data-baseweb="tab"] {{
-        color: {TEXT_MUTED} !important;
+        color: {TAB_INACTIVE} !important;
         font-weight: 600 !important;
-        font-size: 14px !important;
+        font-size: 14.5px !important;
         background: transparent !important;
         padding: 10px 18px !important;
+        opacity: 0.9 !important;
+    }}
+    
+    button[data-baseweb="tab"] * {{
+        color: inherit !important;
     }}
     
     button[data-baseweb="tab"][aria-selected="true"] {{
         color: {ACCENT_BLUE} !important;
         border-bottom: 3px solid {ACCENT_BLUE} !important;
         font-weight: 700 !important;
+        opacity: 1 !important;
     }}
     
     button[data-baseweb="tab"]:hover {{
         color: {TEXT_MAIN} !important;
+        opacity: 1 !important;
     }}
-    
-    /* Buttons & Form Submit Buttons */
-    .stButton button,
+
+    /* Primary buttons (active domain & submit) */
+    button[kind="primary"],
     [data-testid="stFormSubmitButton"] button {{
         background: {BUTTON_GRADIENT} !important;
         color: #ffffff !important;
@@ -293,23 +302,48 @@ st.markdown(f"""
         font-weight: 700 !important;
         padding: 0.55rem 1.1rem !important;
         min-height: 42px !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
         transition: all 0.2s ease !important;
     }}
     
-    .stButton button p,
-    .stButton button span,
-    [data-testid="stFormSubmitButton"] button p,
-    [data-testid="stFormSubmitButton"] button span {{
+    button[kind="primary"] *,
+    [data-testid="stFormSubmitButton"] button * {{
         color: #ffffff !important;
         font-weight: 700 !important;
     }}
-    
-    .stButton button:hover,
+
+    button[kind="primary"]:hover,
     [data-testid="stFormSubmitButton"] button:hover {{
         opacity: 0.92 !important;
         transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35) !important;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4) !important;
+    }}
+
+    /* Secondary buttons (inactive domain pills) */
+    button[kind="secondary"] {{
+        background-color: {SURFACE_CARD} !important;
+        color: {TEXT_MAIN} !important;
+        border: 1.5px solid {BORDER_COLOR} !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        padding: 0.55rem 1.1rem !important;
+        min-height: 42px !important;
+        transition: all 0.2s ease !important;
+    }}
+    
+    button[kind="secondary"] * {{
+        color: {TEXT_MAIN} !important;
+        font-weight: 600 !important;
+    }}
+    
+    button[kind="secondary"]:hover {{
+        border-color: {ACCENT_BLUE} !important;
+        color: {ACCENT_BLUE} !important;
+        transform: translateY(-1px);
+    }}
+    
+    button[kind="secondary"]:hover * {{
+        color: {ACCENT_BLUE} !important;
     }}
 
     /* Plotly Chart Container */
@@ -318,6 +352,11 @@ st.markdown(f"""
         border: 1px solid {BORDER_COLOR};
         border-radius: 12px;
         padding: 8px;
+    }}
+    
+    /* Alerts and Warnings */
+    [data-testid="stAlert"] * {{
+        color: {TEXT_MAIN} !important;
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -1189,9 +1228,30 @@ elif selected_domain == "ML Severity Predictor & Evaluation":
         @st.cache_resource
         def load_rf_model():
             import joblib
+            import urllib.request
             model_path = PROJECT_ROOT / "models" / "accident_severity_random_forest.pkl"
-            if model_path.exists():
-                return joblib.load(model_path)
+            
+            # If not present, automatically download from fallback repository
+            if not model_path.exists() or model_path.stat().st_size < 1000:
+                fallback_urls = [
+                    "https://github.com/pavannaik081-sketch/smart-traffic-accident-intelligence/raw/main/models/accident_severity_random_forest.pkl",
+                    "https://huggingface.co/datasets/pavan-data-lab/nyc-traffic-accidents/resolve/main/accident_severity_random_forest.pkl"
+                ]
+                model_path.parent.mkdir(parents=True, exist_ok=True)
+                for u in fallback_urls:
+                    try:
+                        urllib.request.urlretrieve(u, str(model_path))
+                        if model_path.exists() and model_path.stat().st_size > 1000:
+                            break
+                    except Exception:
+                        pass
+                        
+            if model_path.exists() and model_path.stat().st_size > 1000:
+                try:
+                    return joblib.load(model_path)
+                except Exception as ex:
+                    st.error(f"Error initializing prediction model: {ex}")
+                    return None
             return None
 
         model_pipeline = load_rf_model()
